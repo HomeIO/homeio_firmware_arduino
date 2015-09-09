@@ -270,7 +270,8 @@ int dht::_readSensor(uint8_t pin, uint8_t wakeupDelay)
 // I had some problems including other files so I put stuff above
 // My code is below of that line
 
-#define DHT22_PIN 0
+#define DHT22_INTERNAL_PIN 0
+#define DHT21_EXTERNAL_PIN 1
 
 const int ledPin = 13;
 
@@ -292,9 +293,12 @@ unsigned int testValue = 12345;
 byte buffer = 0;
 
 dht DHT;
-int dhtChk = DHTLIB_ERROR_CHECKSUM;
-int humidity = 0;
-int dTemp = 0;
+int internalChk = DHTLIB_ERROR_CHECKSUM;
+int internalHumidity = 0;
+int internalTemp = 0;
+int externalChk = DHTLIB_ERROR_CHECKSUM;
+int externalHumidity = 0;
+int externalTemp = 0;
 
 void setup()
 {
@@ -333,6 +337,7 @@ void loop() {
     }
 
     // temperature
+    // temporary sensor is not connected
     if (command == '2') {
       buffer = tempValue / 256;
       Serial.write(buffer);
@@ -366,31 +371,57 @@ void loop() {
       Serial.write(buffer);
     }
     
-    // humidity
+    // internal - humidity
     if (command == 'h') {
-      buffer = humidity / 256;
+      buffer = internalHumidity / 256;
       Serial.write(buffer);
 
-      buffer = humidity % 256;
+      buffer = internalHumidity % 256;
       Serial.write(buffer);
     }
     
-    
-    // digital temp
+    // internal - digital temp
     if (command == 'd') {
-      buffer = dTemp / 256;
+      buffer = internalTemp / 256;
       Serial.write(buffer);
 
-      buffer = dTemp % 256;
+      buffer = internalTemp % 256;
       Serial.write(buffer);
     }
     
-    // digital sensor status
+    // internal - digital sensor status
     if (command == 'e') {
-      buffer = dhtChk / 256;
+      buffer = internalChk / 256;
       Serial.write(buffer);
 
-      buffer = dhtChk % 256;
+      buffer = internalChk % 256;
+      Serial.write(buffer);
+    }    
+
+    // external - humidity
+    if (command == 'H') {
+      buffer = externalHumidity / 256;
+      Serial.write(buffer);
+
+      buffer = externalHumidity % 256;
+      Serial.write(buffer);
+    }
+    
+    // external - digital temp
+    if (command == 'D') {
+      buffer = externalTemp / 256;
+      Serial.write(buffer);
+
+      buffer = externalTemp % 256;
+      Serial.write(buffer);
+    }
+    
+    // external - digital sensor status
+    if (command == 'E') {
+      buffer = externalChk / 256;
+      Serial.write(buffer);
+
+      buffer = externalChk % 256;
       Serial.write(buffer);
     }    
 
@@ -455,11 +486,17 @@ void loop() {
     }
     
     // digital humidity and temp
-    dhtChk = DHT.read22(DHT22_PIN);
-    if (dhtChk == DHTLIB_OK) {
-      humidity = (int) ( DHT.humidity * 20.0 );
-      dTemp = (int) ( DHT.temperature * 20.0 );      
+    internalChk = DHT.read22(DHT22_INTERNAL_PIN);
+    if (internalChk == DHTLIB_OK) {
+      internalHumidity = (int) ( DHT.humidity * 10.0 );
+      internalTemp = (int) ( ( 50.0 + DHT.temperature ) * 10.0 );      
     }
+    
+    externalChk = DHT.read22(DHT21_EXTERNAL_PIN);
+    if (externalChk == DHTLIB_OK) {
+      externalHumidity = (int) ( DHT.humidity * 10.0 );
+      externalTemp = (int) ( ( 50.0 + DHT.temperature ) * 10.0 );      
+    }    
   }
   
   
