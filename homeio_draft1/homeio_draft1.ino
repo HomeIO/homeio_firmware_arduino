@@ -293,6 +293,7 @@ unsigned int testValue = 12345;
 byte buffer = 0;
 
 dht DHT;
+int tmpDht = 0;
 int internalChk = DHTLIB_ERROR_CHECKSUM;
 int internalHumidity = 0;
 int internalTemp = 0;
@@ -488,14 +489,28 @@ void loop() {
     // digital humidity and temp
     internalChk = DHT.read22(DHT22_INTERNAL_PIN);
     if (internalChk == DHTLIB_OK) {
-      internalHumidity = (int) ( DHT.humidity * 10.0 );
-      internalTemp = (int) ( ( 50.0 + DHT.temperature ) * 10.0 );      
+      tmpDht = (int) ( DHT.humidity * 10.0 );
+      if ( (tmpDht <= 1000) && (tmpDht >= 0) ){
+        internalHumidity = tmpDht;
+      }
+      
+      tmpDht = (int) ( ( 50.0 + DHT.temperature ) * 10.0 );
+       if ( (tmpDht <= 2000) && (tmpDht >= 0) ){
+        internalTemp = tmpDht;
+      }     
     }
     
-    externalChk = DHT.read22(DHT21_EXTERNAL_PIN);
+    externalChk = DHT.read21(DHT21_EXTERNAL_PIN);
     if (externalChk == DHTLIB_OK) {
-      externalHumidity = (int) ( DHT.humidity * 10.0 );
-      externalTemp = (int) ( ( 50.0 + DHT.temperature ) * 10.0 );      
+      tmpDht = (int) ( DHT.humidity * 10.0 );
+      if ( (tmpDht <= 1000) && (tmpDht >= 0) ){
+        externalHumidity = tmpDht;
+      }
+      
+      tmpDht = (int) ( ( 50.0 + DHT.temperature ) * 10.0 );
+       if ( (tmpDht <= 2000) && (tmpDht >= 0) ){
+        externalTemp = tmpDht;
+      }     
     }    
   }
   
